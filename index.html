@@ -104,6 +104,7 @@
     .item-left { display:flex; gap:14px; align-items:flex-start; min-width:0; flex:1; }
     .item-icon { font-size:26px; line-height:1; flex-shrink:0; margin-top:2px; }
     .item-title { font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .item-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 9px; border-radius:999px; background:var(--blue); color:#fff; letter-spacing:0.2px; }
     .item-desc { font-size:13px; color:var(--muted); margin-top:3px; }
     .item-note { font-size:11px; color:#bbb; margin-top:6px; line-height:1.5; word-break:keep-all; }
     .item-right { text-align:right; min-width:130px; padding-left:6px; flex-shrink:0; }
@@ -2272,6 +2273,7 @@ function recalc(){
   addService("🧥","가운클리닝","벌당 2만원","월 "+gown+"벌");
   addService("🚚","긴급배송","건당 2만원","월 5회");
   addService("📦","반품","","낱알/완통 무제한","※ 반품불가 품목 제외");
+  addService("🌸","향균케어","유사서비스 월 27,900원","월 5,000점 차감","※ 1회 서비스 실행 시 자동분사 방향제 설치 및 관리, 바이러스 살균 소독 1회 진행","마일리지 ON");
   const otcBase=Math.min(amount,300000),otcVal=otcBase*0.06;
   addMoneyToService("🧴","의약외품 적립혜택","최대 300,000원 주문시 6%",otcVal,"※ 공급사: 이팜/헬스인팜/대성메디케어/탑헬스케어/건강두배로/제이웰팜/월드비전팜/팜스랜드");
 
@@ -2296,13 +2298,14 @@ if(window._svcCollapsed){
 
   function addMoneyToFinance(i,t,d,v,n,dh=false){total+=v;financeHtml+=renderMoneyItem({icon:i,title:t,descOrHtml:d,descIsHtml:dh,note:n,val:v,percentBase:amount});}
   function addMoneyToService(i,t,d,v,n){serviceHtml+=renderMoneyItem({icon:i,title:t,descOrHtml:d,descIsHtml:false,note:n,val:v,percentBase:amount});}
-  function addService(i,t,d,r,n){serviceHtml+=renderServiceItem({icon:i,title:t,desc:d,rightText:r,note:n});}
+  function addService(i,t,d,r,n,badge){serviceHtml+=renderServiceItem({icon:i,title:t,desc:d,rightText:r,note:n,badge:badge});}
   function renderMoneyItem({icon,title,descOrHtml,descIsHtml,note,val,percentBase}){
     const pct=(val/percentBase*100).toFixed(2)+"%";
     return `<div class="item"><div class="item-left"><div class="item-icon">${icon}</div><div><div class="item-title">${eh(title)}</div>${descOrHtml?`<div class="item-desc">${descIsHtml?descOrHtml:eh(descOrHtml)}</div>`:`<div class="item-desc"></div>`}${note?`<div class="item-note">${eh(note)}</div>`:''}</div></div><div class="item-right"><div class="item-percent">${pct}</div><div class="item-value">${Number(val).toLocaleString()}원</div></div></div>`;
   }
-  function renderServiceItem({icon,title,desc,rightText,note}){
-    return `<div class="item"><div class="item-left"><div class="item-icon">${icon}</div><div><div class="item-title">${eh(title)}</div>${desc?`<div class="item-desc">${eh(desc)}</div>`:`<div class="item-desc"></div>`}${note?`<div class="item-note">${eh(note)}</div>`:''}</div></div><div class="item-right"><span class="item-right-text">${eh(rightText)}</span></div></div>`;
+  function renderServiceItem({icon,title,desc,rightText,note,badge}){
+    const badgeHtml = badge ? ` <span class="item-badge">${eh(badge)}</span>` : '';
+    return `<div class="item"><div class="item-left"><div class="item-icon">${icon}</div><div><div class="item-title">${eh(title)}${badgeHtml}</div>${desc?`<div class="item-desc">${eh(desc)}</div>`:`<div class="item-desc"></div>`}${note?`<div class="item-note">${eh(note)}</div>`:''}</div></div><div class="item-right"><span class="item-right-text">${eh(rightText)}</span></div></div>`;
   }
   function cardFilterHtml(){
     const opts=cardOptions.map(o=>`<option value="${ea(o.name)}"${o.name===selectedCardName?" selected":""}>${eh(o.name)}</option>`).join("");
