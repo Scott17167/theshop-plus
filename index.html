@@ -599,6 +599,46 @@
 .svc-toggle-icon { font-size:12px; color:#888; transition: transform 0.25s; }
 #svcBody { transition: max-height 0.3s ease, opacity 0.3s ease; overflow:hidden; }
 
+/* ── 대웅그룹사 입고(영업사원용) 탭 ── */
+#tab-dwstock { padding:0; }
+.dws-hero { background:linear-gradient(135deg,#1a3a6b 0%,#2563a8 60%,#3b82c4 100%); color:#fff; padding:40px 20px 30px; text-align:center; }
+.dws-hero-label { font-size:0.75em; letter-spacing:3px; opacity:0.7; margin-bottom:8px; }
+.dws-hero-title { font-size:2em; font-weight:800; margin:0 0 8px; }
+.dws-hero-sub { font-size:0.9em; opacity:0.85; }
+.dws-main { max-width:1000px; margin:0 auto; padding:28px 24px 80px; }
+.dws-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 16px; margin-bottom:16px; }
+.dws-updated { font-size:12px; color:#64748b; }
+.dws-updated strong { color:#2563a8; }
+.dws-toolbar-right { display:flex; align-items:center; gap:10px; }
+.dws-auto-note { font-size:11px; color:#94a3b8; }
+.dws-refresh-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:none; border-radius:8px; background:#2563a8; color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:background 0.15s; }
+.dws-refresh-btn:hover { background:#1a4a8a; }
+.dws-refresh-btn.loading { opacity:0.6; pointer-events:none; }
+.dws-refresh-btn .dws-spin { display:inline-block; animation:dwsSpin 0.8s linear infinite; }
+@keyframes dwsSpin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.dws-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #e2e8f0; }
+.dws-table { width:100%; border-collapse:collapse; font-size:13px; min-width:920px; }
+.dws-table thead tr { background:#f1f5f9; }
+.dws-table th { padding:10px 12px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+.dws-table td { padding:10px 12px; border-bottom:1px solid #f1f5f9; vertical-align:middle; color:#334155; }
+.dws-table tr:hover td { background:#f8fafc; }
+.dws-table tr:last-child td { border-bottom:none; }
+.dws-status { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; white-space:nowrap; }
+.dws-status.done { background:#dcfce7; color:#15803d; }
+.dws-status.pending { background:#ffedd5; color:#c2410c; }
+.dws-status.etc { background:#f1f5f9; color:#64748b; }
+.dws-state { text-align:center; padding:50px 20px; color:#94a3b8; font-size:14px; background:#fafafa; border-radius:12px; border:1px solid #f0f0f0; }
+.dws-state.error { color:#dc2626; }
+.dws-note { font-size:12px; color:#94a3b8; padding:14px 4px 0; line-height:1.8; }
+@media(max-width:640px){
+  .dws-hero { padding:28px 16px 22px; }
+  .dws-hero-title { font-size:1.5em; }
+  .dws-main { padding:20px 16px 60px; }
+  .dws-table { font-size:12px; min-width:760px; }
+  .dws-toolbar { flex-direction:column; align-items:stretch; }
+  .dws-toolbar-right { justify-content:space-between; }
+}
+
 </style>
 </head>
 <body>
@@ -617,6 +657,7 @@
     <button class="tab-btn" onclick="switchTab('benefit',this)">⭐ 사용하면 좋은점</button>
     <button class="tab-btn" onclick="switchTab('sim',this)">📊 혜택 시뮬레이터</button>
     <button class="tab-btn" onclick="switchTab('apply',this)">📋 신청방법</button>
+    <button class="tab-btn" onclick="switchTab('dwstock',this)">🚚 대웅그룹사 입고(영업사원용)</button>
   </div>
 </nav>
 </div>
@@ -1644,6 +1685,35 @@
   </div>
 </div><!-- /tab-compare -->
 
+<!-- TAB: 대웅그룹사 입고(영업사원용) -->
+<div id="tab-dwstock" class="tab-panel">
+  <div class="dws-hero">
+    <div class="dws-hero-label">DAEWOONG GROUP · STOCK-IN INFO</div>
+    <h2 class="dws-hero-title">대웅그룹사 입고 정보</h2>
+    <p class="dws-hero-sub">영업사원용 · Google 시트 원본 데이터를 그대로 불러옵니다</p>
+  </div>
+
+  <div class="dws-main">
+    <div class="dws-toolbar">
+      <div class="dws-updated">마지막 업데이트: <strong id="dwsUpdatedAt">불러오는 중…</strong></div>
+      <div class="dws-toolbar-right">
+        <span class="dws-auto-note">탭 진입 시 자동 새로고침 · 5분마다 자동 갱신</span>
+        <button class="dws-refresh-btn" id="dwsRefreshBtn" onclick="loadDwStock()"><span>🔄</span> 새로고침</button>
+      </div>
+    </div>
+
+    <div id="dwsContent">
+      <div class="dws-state" id="dwsInitialState">⏳ 데이터를 불러오는 중입니다…</div>
+    </div>
+
+    <div class="dws-note">
+      ※ 원본 데이터: <a href="https://docs.google.com/spreadsheets/d/1y7qRhHpM1pb8zUAZ46DKvOsTrr3EDBJztUaKprg7_iI/edit?gid=0#gid=0" target="_blank" rel="noopener" style="color:#2563a8;font-weight:700;">대웅그룹사 입고 정보 구글시트</a> — 원본 시트가 업데이트되면 이 페이지에도 그대로 반영됩니다.<br>
+      ※ 입고일 기준 +14일 이상 경과 항목은 원본 시트에서 자동 삭제 처리됩니다.<br>
+      ※ 데이터 확인 후 이상이 있을 경우 담당 PM 또는 시트 관리자에게 문의해 주세요.
+    </div>
+  </div>
+</div>
+<!-- /TAB: 대웅그룹사 입고(영업사원용) -->
 
 <!-- ── 가이드북 서비스 팝업 오버레이 ── -->
 
@@ -1810,6 +1880,146 @@ function switchTab(id, btn) {
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (id === 'dwstock') { dwsOnTabEnter(); } else { dwsOnTabLeave(); }
+}
+
+// ── 대웅그룹사 입고(영업사원용) — Google 시트 실시간 연동 ──
+const DWS_SHEET_ID = '1y7qRhHpM1pb8zUAZ46DKvOsTrr3EDBJztUaKprg7_iI';
+const DWS_GID = '0';
+let dwsLoading = false;
+let dwsAutoTimer = null;
+
+// 탭 진입 시: 즉시 1회 로드 + 5분 간격 자동 갱신 시작
+function dwsOnTabEnter(){
+  loadDwStock();
+  if (dwsAutoTimer) clearInterval(dwsAutoTimer);
+  dwsAutoTimer = setInterval(loadDwStock, 5 * 60 * 1000);
+}
+// 탭 이탈 시: 자동 갱신 중단 (불필요한 요청 방지)
+function dwsOnTabLeave(){
+  if (dwsAutoTimer) { clearInterval(dwsAutoTimer); dwsAutoTimer = null; }
+}
+
+function loadDwStock(){
+  if (dwsLoading) return;
+  dwsLoading = true;
+  const btn = document.getElementById('dwsRefreshBtn');
+  if (btn) btn.classList.add('loading');
+
+  // 이전 JSONP 스크립트 제거
+  const old = document.getElementById('dwsJsonpScript');
+  if (old) old.remove();
+
+  const cbName = '__dwsCallback_' + Date.now();
+  window[cbName] = function(data){
+    dwsLoading = false;
+    if (btn) btn.classList.remove('loading');
+    delete window[cbName];
+    try {
+      renderDwStock(data);
+    } catch (err) {
+      console.error('[dws] render error', err);
+      renderDwStockError();
+    }
+  };
+
+  const script = document.createElement('script');
+  script.id = 'dwsJsonpScript';
+  script.src = 'https://docs.google.com/spreadsheets/d/' + DWS_SHEET_ID
+    + '/gviz/tq?tqx=out:json;responseHandler:' + cbName
+    + '&gid=' + DWS_GID + '&_=' + Date.now();
+  script.onerror = function(){
+    dwsLoading = false;
+    if (btn) btn.classList.remove('loading');
+    delete window[cbName];
+    renderDwStockError();
+  };
+  document.body.appendChild(script);
+}
+
+function dwsEsc(s){
+  return String(s == null ? '' : s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+}
+
+function dwsStatusBadge(v){
+  const s = (v || '').toString().trim();
+  if (!s) return '<span class="dws-status etc">-</span>';
+  if (s.indexOf('완료') >= 0) return '<span class="dws-status done">' + dwsEsc(s) + '</span>';
+  if (s.indexOf('예정') >= 0) return '<span class="dws-status pending">' + dwsEsc(s) + '</span>';
+  return '<span class="dws-status etc">' + dwsEsc(s) + '</span>';
+}
+
+function renderDwStockError(){
+  const el = document.getElementById('dwsContent');
+  if (el) el.innerHTML = '<div class="dws-state error">⚠️ 데이터를 불러오지 못했습니다. 네트워크 상태를 확인 후 다시 시도해주세요.<br>'
+    + '<button class="dws-refresh-btn" style="margin-top:12px;" onclick="loadDwStock()">다시 시도</button></div>';
+}
+
+// 구글시트 gviz 셀 값 추출 (서식이 있으면 서식 문자열(f), 없으면 원본값(v))
+function dwsCellText(c){
+  if (!c || c.v == null) return '';
+  return c.f != null ? c.f : c.v;
+}
+
+function renderDwStock(data){
+  const rows = (data && data.table && data.table.rows) || [];
+
+  // 시트 B~L열(제약사~비고)만 사용. 제품명(D열)이 비어있는 행은 우측 참조용 룩업 데이터이므로 제외
+  const items = rows.map(function(r){
+    const c = r.c || [];
+    return {
+      maker:  dwsCellText(c[1]),
+      code:   dwsCellText(c[2]),
+      name:   dwsCellText(c[3]),
+      spec:   dwsCellText(c[4]),
+      unit:   dwsCellText(c[5]),
+      inDate: dwsCellText(c[6]),
+      orderDate: dwsCellText(c[7]),
+      status: dwsCellText(c[8]),
+      alt:    dwsCellText(c[9]),
+      pm:     dwsCellText(c[10]),
+      note:   dwsCellText(c[11])
+    };
+  }).filter(function(it){ return it.name; });
+
+  const wrap = document.getElementById('dwsContent');
+  if (!wrap) return;
+
+  if (items.length === 0) {
+    wrap.innerHTML = '<div class="dws-state">현재 등록된 입고 정보가 없습니다.</div>';
+  } else {
+    const rowsHtml = items.map(function(it){
+      return '<tr>'
+        + '<td>' + dwsEsc(it.maker) + '</td>'
+        + '<td>' + dwsEsc(it.code) + '</td>'
+        + '<td style="font-weight:700;color:#1e293b;">' + dwsEsc(it.name) + '</td>'
+        + '<td>' + dwsEsc(it.spec) + '</td>'
+        + '<td>' + dwsEsc(it.unit) + '</td>'
+        + '<td>' + dwsEsc(it.inDate) + '</td>'
+        + '<td>' + dwsEsc(it.orderDate) + '</td>'
+        + '<td>' + dwsStatusBadge(it.status) + '</td>'
+        + '<td>' + dwsEsc(it.alt) + '</td>'
+        + '<td>' + dwsEsc(it.pm) + '</td>'
+        + '<td>' + dwsEsc(it.note) + '</td>'
+        + '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<div class="dws-table-wrap"><table class="dws-table">'
+      + '<thead><tr>'
+      + '<th>제약사</th><th>자재코드</th><th>제품명</th><th>규격명</th><th>단위</th>'
+      + '<th>대웅 입고일</th><th>더샵 주문 가능일</th><th>확정여부</th><th>대체품목</th><th>담당 PM</th><th>비고</th>'
+      + '</tr></thead>'
+      + '<tbody>' + rowsHtml + '</tbody>'
+      + '</table></div>';
+  }
+
+  const updatedEl = document.getElementById('dwsUpdatedAt');
+  if (updatedEl) {
+    const now = new Date();
+    const pad = function(n){ return String(n).padStart(2,'0'); };
+    updatedEl.textContent = now.getFullYear() + '.' + pad(now.getMonth()+1) + '.' + pad(now.getDate())
+      + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ' 기준 (총 ' + items.length + '건)';
+  }
 }
 
 function switchBenefitTab(id, btn) {
