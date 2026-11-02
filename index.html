@@ -75,6 +75,20 @@
     .amount-label { font-size:13px; color:#888; margin-bottom:4px; }
     .amount-value { font-family:'Montserrat',sans-serif; font-size:26px; font-weight:900; color:var(--orange); }
     .amount-value small { font-size:15px; font-family:'Noto Sans KR',sans-serif; }
+    /* 두괄식 즉시 결과 (슬라이더 바로 아래) */
+    .quick-result { margin-top:14px; background:linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%); border-radius:16px; padding:18px 22px; color:#fff; box-shadow:var(--shadow); }
+    .quick-grid { display:grid; grid-template-columns:1fr 1fr 0.8fr; gap:12px; }
+    .quick-item.quick-fixed { background:#fff; color:var(--orange); }
+    .quick-fixed .quick-label { color:#888; opacity:1; }
+    .quick-fixed .quick-value { font-family:'Noto Sans KR',sans-serif; font-size:clamp(15px,2.2vw,19px); line-height:1.3; }
+    .quick-item { background:rgba(255,255,255,0.16); border-radius:12px; padding:12px 16px; }
+    .quick-label { font-size:12px; opacity:0.9; margin-bottom:4px; }
+    .quick-value { font-family:'Montserrat',sans-serif; font-size:clamp(20px,3.4vw,28px); font-weight:900; line-height:1.15; }
+    .quick-value small { font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:500; opacity:0.85; margin-left:4px; }
+    .quick-reason { margin-top:12px; font-size:13px; line-height:1.65; }
+    .quick-reason strong { font-weight:900; }
+    .qr-tag { display:inline-block; margin-left:4px; padding:0 6px; border-radius:6px; background:rgba(255,255,255,0.25); font-size:11px; font-weight:700; line-height:1.6; vertical-align:1px; }
+    @media(max-width:640px){ .quick-grid { grid-template-columns:1fr 1fr; gap:8px; } .quick-fixed { grid-column:1 / -1; } .quick-fixed .quick-value br { display:none; } .quick-item { padding:10px 12px; } .quick-result { padding:14px 14px; } }
     .toggle-wrap { display:flex; align-items:center; gap:12px; font-size:14px; font-weight:600; color:#444; }
     .toggle-switch { position:relative; width:48px; height:26px; }
     .toggle-switch input { opacity:0; width:0; height:0; }
@@ -648,6 +662,30 @@
   .dws-toolbar-right { justify-content:space-between; }
 }
 
+/* ── 품절약 조회 탭 (외부 앱 iframe) ── */
+#tab-shortage { padding:0; }
+.shq-bar { background:linear-gradient(135deg,#0f4d37 0%,#176b4c 60%,#2a8a64 100%); color:#fff; }
+.shq-bar-inner { max-width:1180px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.shq-title { font-size:18px; font-weight:800; margin:0; }
+.shq-sub { font-size:12px; opacity:0.85; margin-top:2px; }
+.shq-actions { display:flex; gap:8px; }
+.shq-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; border:1.5px solid rgba(255,255,255,0.55); background:transparent; color:#fff; transition:background 0.15s; }
+.shq-btn:hover { background:rgba(255,255,255,0.15); }
+.shq-btn.primary { background:#fff; color:#176b4c; border-color:#fff; }
+.shq-btn.primary:hover { background:#e8f3ec; }
+.shq-frame-wrap { position:relative; background:#f5f7f3; }
+.shq-frame { display:block; width:100%; height:calc(100vh - 190px); min-height:640px; border:0; background:#f5f7f3; }
+.shq-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#6a7e76; font-size:14px; pointer-events:none; }
+.shq-note { max-width:1180px; margin:0 auto; padding:10px 24px 40px; font-size:12px; color:#94a3b8; line-height:1.8; }
+@media(max-width:640px){
+  .shq-bar-inner { padding:12px 16px; }
+  .shq-title { font-size:16px; }
+  .shq-actions { width:100%; }
+  .shq-btn { flex:1; justify-content:center; }
+  .shq-frame { height:calc(100vh - 220px); min-height:520px; }
+  .shq-note { padding:10px 16px 32px; }
+}
+
 </style>
 </head>
 <body>
@@ -667,6 +705,7 @@
     <button class="tab-btn" onclick="switchTab('sim',this)">📊 혜택 시뮬레이터</button>
     <button class="tab-btn" onclick="switchTab('apply',this)">📋 신청방법</button>
     <button class="tab-btn" onclick="switchTab('dwstock',this)">🚚 대웅그룹사 입고(영업사원용)</button>
+    <button class="tab-btn" onclick="switchTab('shortage',this)">💊 품절약 조회</button>
   </div>
 </nav>
 </div>
@@ -717,6 +756,7 @@
           예치금 혜택 적용
         </div>
       </div>
+      <div class="quick-result" id="quickResult"></div>
     </div>
     <div class="actions">
       <button class="btn btn-primary" id="btnPdf"><span>📄</span> PDF 저장 / 출력</button>
@@ -1693,6 +1733,31 @@
 </div>
 <!-- /TAB: 대웅그룹사 입고(영업사원용) -->
 
+<!-- TAB: 품절약 조회 (외부 앱 iframe) -->
+<div id="tab-shortage" class="tab-panel">
+  <div class="shq-bar">
+    <div class="shq-bar-inner">
+      <div>
+        <h2 class="shq-title">💊 품절약 조회</h2>
+        <div class="shq-sub">품절약 배정 앱 · 처음 한 번 본인 사번으로 로그인하세요</div>
+      </div>
+      <div class="shq-actions">
+        <button class="shq-btn" onclick="shqReload()">🔄 새로고침</button>
+        <a class="shq-btn primary" id="shqOpenNew" href="https://shortage-pharmacy-allocation.kingcar7918.chatgpt.site/app?page=shortages" target="_blank" rel="noopener">↗ 새 창으로 열기</a>
+      </div>
+    </div>
+  </div>
+  <div class="shq-frame-wrap">
+    <div class="shq-loading" id="shqLoading">⏳ 품절약 조회 화면을 불러오는 중입니다…</div>
+    <iframe id="shqFrame" class="shq-frame" title="품절약 조회" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <div class="shq-note">
+    ※ 로그인 상태는 브라우저에 저장되어 다음부터는 바로 조회됩니다.<br>
+    ※ 아이폰(Safari) 등에서 로그인이 유지되지 않거나 화면이 뜨지 않으면 <strong>‘새 창으로 열기’</strong>를 이용해 주세요.
+  </div>
+</div>
+<!-- /TAB: 품절약 조회 -->
+
 <!-- ── 가이드북 서비스 팝업 오버레이 ── -->
 
 <div class="guide-popup-overlay" id="guidePopup_delivery" onclick="closeGuidePopup(event, 'delivery')">
@@ -1859,6 +1924,22 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 'dwstock') { dwsOnTabEnter(); } else { dwsOnTabLeave(); }
+  if (id === 'shortage') { shqOnTabEnter(); }
+}
+
+// ── 품절약 조회 — 외부 앱 iframe (탭 첫 진입 시에만 로드) ──
+const SHQ_URL = 'https://shortage-pharmacy-allocation.kingcar7918.chatgpt.site/app?page=shortages';
+function shqOnTabEnter(){
+  const f = document.getElementById('shqFrame');
+  if (!f || f.getAttribute('src')) return;
+  f.addEventListener('load', function(){ const l = document.getElementById('shqLoading'); if (l) l.style.display = 'none'; });
+  f.setAttribute('src', SHQ_URL);
+}
+function shqReload(){
+  const f = document.getElementById('shqFrame');
+  if (!f) return;
+  const l = document.getElementById('shqLoading'); if (l) l.style.display = 'flex';
+  f.setAttribute('src', SHQ_URL);
 }
 
 // ── 대웅그룹사 입고(영업사원용) — Google 시트 실시간 연동 ──
@@ -2170,12 +2251,34 @@ function updateStep(i){
   recalc();
 }
 
+// 두괄식 즉시 결과: 월/연간 절감액 + 어떤 금융혜택 때문인지 2줄 요약
+function renderQuickResult(total, parts){
+  const box = document.getElementById('quickResult');
+  if(!box) return;
+  const has = !!(amount && total);
+  const won = n => Math.round(n).toLocaleString() + '원';
+  const pct = v => (v / amount * 100).toFixed(2) + '%';
+  // 금융혜택 항목별 주문금액 대비 % (큰 순서)
+  const line1 = has
+    ? parts.filter(p => p.v > 0).sort((a,b) => b.v - a.v).map(p => `${eh(p.t)}${p.t === '예치금(멤버십)' ? '<span class="qr-tag">국민·하나카드만 가능</span>' : ''} <strong>${pct(p.v)}</strong>`).join(' · ')
+    : '슬라이더를 움직이면 절감액이 바로 표시됩니다';
+  box.innerHTML = `
+    <div class="quick-grid">
+      <div class="quick-item"><div class="quick-label">월 기준 절감액</div><div class="quick-value">${has ? `${won(total)}<small>(${pct(total)})</small>` : '—'}</div></div>
+      <div class="quick-item"><div class="quick-label">연간 환산 절감액</div><div class="quick-value">${has ? won(total*12) : '—'}</div></div>
+      <div class="quick-item quick-fixed"><div class="quick-label">📦 반품</div><div class="quick-value">완통/낱알<br>무제한</div></div>
+    </div>
+    <div class="quick-reason">${line1}</div>`;
+}
+
 function recalc(){
   const useDeposit = elDepositToggle.checked;
   const cardRate   = getSelectedCardRate();
   let total=0, financeHtml="", serviceHtml="";
+  const parts=[]; // 금융혜택 항목별 금액 (두괄식 요약용)
 
   if(amount === 0){
+    renderQuickResult(0, []);
     // 0원 선택 시 — 안내 메시지
     elFinanceSheet.innerHTML = `<div class="sheet-section"><div style="text-align:center;padding:40px 20px;color:#aaa;font-size:14px;">슬라이더를 움직여 월 주문금액을 선택해주세요</div></div>`;
     elServiceSheet.innerHTML = '';
@@ -2192,10 +2295,10 @@ function recalc(){
   if(ms){
     const msVal  = ms.baseAmt * ms.times * ms.rate;
     const msDesc = `100만원 × ${ms.times}회 × ${(ms.rate*100).toFixed(0)}%`;
-    addMoneyToFinance("🏦","예치금 (멤버십)",msDesc,msVal,`※ 예치금 할인 쿠폰 ${ms.times}장 (100만원 기준 월 ${ms.times}회 적용)`);
+    addMoneyToFinance("🏦","예치금 (멤버십)",msDesc,msVal,`※ 국민카드·하나카드만 가능 · 예치금 할인 쿠폰 ${ms.times}장 (100만원 기준 월 ${ms.times}회 적용)`);
   } else {
     // 500만원 미만 — 멤버십 예치금 없음 안내
-    financeHtml += `<div class="item" style="opacity:0.5;"><div class="item-left"><div class="item-icon">🏦</div><div><div class="item-title">예치금 (멤버십)</div><div class="item-desc">500만원 이상 주문 시 적용</div></div></div><div class="item-right"><div class="item-percent">—</div><div class="item-value">해당없음</div></div></div>`;
+    financeHtml += `<div class="item" style="opacity:0.5;"><div class="item-left"><div class="item-icon">🏦</div><div><div class="item-title">예치금 (멤버십)</div><div class="item-desc">500만원 이상 주문 시 적용 · 국민카드·하나카드만 가능</div></div></div><div class="item-right"><div class="item-percent">—</div><div class="item-value">해당없음</div></div></div>`;
   }
 
   // ③ 예치금(더샵플러스) — 토글 On/Off, 1,500만원 상한, 아코디언
@@ -2207,6 +2310,7 @@ function recalc(){
       ? `1,500만원 상한 적용 × 2%`
       : `${(amount/10000).toLocaleString()}만원 × 2%`;
     total += plusVal;
+    parts.push({t:"예치금(더샵플러스)", v:plusVal});
     financeHtml += `
       <div class="item item-accordion" onclick="toggleDepositAccordion(this)">
         <div class="item-left">
@@ -2296,9 +2400,10 @@ if(window._svcCollapsed){
 }
   elMonthTotal.innerHTML=`${total.toLocaleString()}원<br><small style="font-size:13px;font-family:'Noto Sans KR';opacity:0.8;">(${((total/amount)*100).toFixed(2)}%)</small>`;
   elYearTotal.innerHTML=`${(total*12).toLocaleString()}원`;
+  renderQuickResult(total, parts);
   bindCardSelect();
 
-  function addMoneyToFinance(i,t,d,v,n,dh=false,ex={}){total+=v;financeHtml+=renderMoneyItem({icon:i,title:t,descOrHtml:d,descIsHtml:dh,note:n,val:v,percentBase:amount,midHtml:ex.midHtml,limitText:ex.limitText});}
+  function addMoneyToFinance(i,t,d,v,n,dh=false,ex={}){total+=v;parts.push({t:t.replace(/\s*\((.+)\)/,'($1)'),v:v});financeHtml+=renderMoneyItem({icon:i,title:t,descOrHtml:d,descIsHtml:dh,note:n,val:v,percentBase:amount,midHtml:ex.midHtml,limitText:ex.limitText});}
   function addMoneyToService(i,t,d,v,n){serviceHtml+=renderMoneyItem({icon:i,title:t,descOrHtml:d,descIsHtml:false,note:n,val:v,percentBase:amount});}
   function addService(i,t,d,r,n,badge){serviceHtml+=renderServiceItem({icon:i,title:t,desc:d,rightText:r,note:n,badge:badge});}
   function renderMoneyItem({icon,title,descOrHtml,descIsHtml,note,val,percentBase,midHtml,limitText}){
