@@ -668,22 +668,20 @@
 .shq-bar-inner { max-width:1180px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
 .shq-title { font-size:18px; font-weight:800; margin:0; }
 .shq-sub { font-size:12px; opacity:0.85; margin-top:2px; }
-.shq-actions { display:flex; gap:8px; }
-.shq-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; border:1.5px solid rgba(255,255,255,0.55); background:transparent; color:#fff; transition:background 0.15s; }
-.shq-btn:hover { background:rgba(255,255,255,0.15); }
-.shq-btn.primary { background:#fff; color:#176b4c; border-color:#fff; }
-.shq-btn.primary:hover { background:#e8f3ec; }
-.shq-frame-wrap { position:relative; background:#f5f7f3; }
-.shq-frame { display:block; width:100%; height:calc(100vh - 190px); min-height:640px; border:0; background:#f5f7f3; }
-.shq-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#6a7e76; font-size:14px; pointer-events:none; }
-.shq-note { max-width:1180px; margin:0 auto; padding:10px 24px 40px; font-size:12px; color:#94a3b8; line-height:1.8; }
+.shq-launch { background:#f5f7f3; padding:48px 24px 80px; }
+.shq-launch-card { max-width:560px; margin:0 auto; background:#fff; border:1px solid #dde5df; border-radius:20px; padding:40px 32px; text-align:center; box-shadow:0 8px 30px rgba(23,107,76,0.08); }
+.shq-launch-icon { font-size:44px; line-height:1; margin-bottom:14px; }
+.shq-launch-title { font-size:20px; font-weight:900; color:#18342d; margin-bottom:10px; }
+.shq-launch-desc { font-size:14px; color:#6a7e76; line-height:1.7; margin-bottom:26px; }
+.shq-launch-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:340px; padding:16px 20px; border-radius:12px; background:#176b4c; color:#fff; font-size:17px; font-weight:800; text-decoration:none; transition:background 0.15s; }
+.shq-launch-btn:hover { background:#0f4d37; }
+.shq-launch-steps { list-style:none; margin:26px auto 0; padding:18px 20px 0; border-top:1px solid #eef2ef; text-align:left; font-size:13px; color:#475569; line-height:1.9; max-width:420px; }
+.shq-launch-steps li::before { content:'✓'; color:#176b4c; font-weight:900; margin-right:8px; }
 @media(max-width:640px){
   .shq-bar-inner { padding:12px 16px; }
   .shq-title { font-size:16px; }
-  .shq-actions { width:100%; }
-  .shq-btn { flex:1; justify-content:center; }
-  .shq-frame { height:calc(100vh - 220px); min-height:520px; }
-  .shq-note { padding:10px 16px 32px; }
+  .shq-launch { padding:28px 16px 60px; }
+  .shq-launch-card { padding:30px 20px; }
 }
 
 </style>
@@ -1739,21 +1737,22 @@
     <div class="shq-bar-inner">
       <div>
         <h2 class="shq-title">💊 품절약 조회</h2>
-        <div class="shq-sub">품절약 배정 앱 · 처음 한 번 본인 사번으로 로그인하세요</div>
-      </div>
-      <div class="shq-actions">
-        <button class="shq-btn" onclick="shqReload()">🔄 새로고침</button>
-        <a class="shq-btn primary" id="shqOpenNew" href="https://shortage-pharmacy-allocation.kingcar7918.chatgpt.site/app?page=shortages" target="_blank" rel="noopener">↗ 새 창으로 열기</a>
+        <div class="shq-sub">품절약 배정 앱 바로가기 · 새 창에서 본인 사번으로 로그인하세요</div>
       </div>
     </div>
   </div>
-  <div class="shq-frame-wrap">
-    <div class="shq-loading" id="shqLoading">⏳ 품절약 조회 화면을 불러오는 중입니다…</div>
-    <iframe id="shqFrame" class="shq-frame" title="품절약 조회" referrerpolicy="no-referrer-when-downgrade"></iframe>
-  </div>
-  <div class="shq-note">
-    ※ 로그인 상태는 브라우저에 저장되어 다음부터는 바로 조회됩니다.<br>
-    ※ 아이폰(Safari) 등에서 로그인이 유지되지 않거나 화면이 뜨지 않으면 <strong>‘새 창으로 열기’</strong>를 이용해 주세요.
+  <div class="shq-launch">
+    <div class="shq-launch-card">
+      <div class="shq-launch-icon">💊</div>
+      <div class="shq-launch-title">품절약 조회 · 도매상별 재고 확인</div>
+      <div class="shq-launch-desc">시장품절약 기준품목을 제품명·표준코드로 검색하고<br>복산나이스 · 백제약품 · 인천약품 재고를 확인할 수 있습니다.</div>
+      <a class="shq-launch-btn" href="https://shortage-pharmacy-allocation.kingcar7918.chatgpt.site/app?page=shortages" target="_blank" rel="noopener">↗ 품절약 조회 열기</a>
+      <ul class="shq-launch-steps">
+        <li>버튼을 누르면 <strong>새 창</strong>으로 품절약 배정 앱이 열립니다.</li>
+        <li>처음 한 번 <strong>본인 사번</strong>으로 로그인하면 다음부터는 바로 조회됩니다.</li>
+        <li>휴대폰에서는 앱 화면의 ‘설치’ 안내에 따라 홈 화면에 추가해 두면 편리합니다.</li>
+      </ul>
+    </div>
   </div>
 </div>
 <!-- /TAB: 품절약 조회 -->
@@ -1924,22 +1923,6 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 'dwstock') { dwsOnTabEnter(); } else { dwsOnTabLeave(); }
-  if (id === 'shortage') { shqOnTabEnter(); }
-}
-
-// ── 품절약 조회 — 외부 앱 iframe (탭 첫 진입 시에만 로드) ──
-const SHQ_URL = 'https://shortage-pharmacy-allocation.kingcar7918.chatgpt.site/app?page=shortages';
-function shqOnTabEnter(){
-  const f = document.getElementById('shqFrame');
-  if (!f || f.getAttribute('src')) return;
-  f.addEventListener('load', function(){ const l = document.getElementById('shqLoading'); if (l) l.style.display = 'none'; });
-  f.setAttribute('src', SHQ_URL);
-}
-function shqReload(){
-  const f = document.getElementById('shqFrame');
-  if (!f) return;
-  const l = document.getElementById('shqLoading'); if (l) l.style.display = 'flex';
-  f.setAttribute('src', SHQ_URL);
 }
 
 // ── 대웅그룹사 입고(영업사원용) — Google 시트 실시간 연동 ──
